@@ -5,7 +5,7 @@ from flask import Flask, url_for
 from random import randint
 
 app = Flask(__name__)
-cache = redis.Redis(host='redis', port=6379)
+cache = redis.Redis(host='redis', port=6379, charset="utf-8", decode_responses=True)
 primeSet = "primes"
 
 def get_hit_count():
@@ -22,7 +22,7 @@ def get_hit_count():
 def fastIsPrime(num, k=5): #source code: https://tinyurl.com/millerRabinSourceCode
     from random import randint
     n = int(num)
-    if n < 2: return (n, "is not a prime number")
+    if n < 2: return ("False");
     for p in [2,3,5,7,11,13,17,19,23,29]:
         if n % p == 0: return n == p
     s, d = 0, n-1
@@ -33,23 +33,31 @@ def fastIsPrime(num, k=5): #source code: https://tinyurl.com/millerRabinSourceCo
         if x == 1 or x == n-1: continue
         for r in range(1, s):
             x = (x * x) % n
-            if x == 1: return (n, "is not a prime number") 
+            if x == 1: return ("False") 
             if x == n-1: break
-        else: return (n, "is not a prime number")
-    cache.sadd(primeSet, n); 
-    return (n, "is a prime number") 
+        else: return ("False")
+    cache.sadd(primeSet, n) 
+    return ("True") 
+
+def returnList():
+    rS = ""
+    return (rS);
 
 @app.route('/')
 def hello1():
     count = get_hit_count()
-    return 'Hello World! I have been seen {} times.\n'.format(count)
+    return 'Hello World! I have been seen {} times!\n'.format(count)
 
 @app.route('/isPrime/<num>')
 def hello2(num):
     count1 = fastIsPrime(num)
-    return 'The number is prime: {}\n'.format(count1)
+    return 'The number {} is prime!: {}\n'.format(num, count1)
 
 @app.route('/primesStored')
 def hello3():
-    count2 = get_hit_count()
-    return 'Hello Other World! I have been seen {} times.\n'.format(count2)
+    return 'List!: {}\n'.format(cache.smembers(primeSet))
+
+@app.route('/clear')
+def hello4():
+    cache.flushdb()
+    return 'Cleared!!'
