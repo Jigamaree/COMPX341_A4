@@ -5,12 +5,15 @@ services:
     ports:
       - "63564:5000"
     cpus: 0.1
-    mem_limit: 128M
+    mem_limit: 256M
     restart: on-failure
   redis:
     image: "redis:alpine"
     cpus: 0.1
-    mem_limit: 128M
+    mem_limit: 256M
     restart: on-failure
 
+#mem_limit: 8M
+#mem_limit: 128M
+#mem_limit: 256M
 
